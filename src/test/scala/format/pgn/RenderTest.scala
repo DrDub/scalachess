@@ -2,6 +2,7 @@ package chess
 package format.pgn
 
 import Pos._
+import NlRender._
 
 class RenderTest extends ChessTest {
 
@@ -116,6 +117,53 @@ opening theory } 10. Bxc6 (10. O-O Bxc3 11. Bxc6 Bxb2 12. Bxb7 Bxa1 13.
 [ECO "A00e"]
 
 1. a4 { [%clk 0:04:58] } Nf6 { [%clk 0:04:59] } 2. d4 { [%clk 0:04:55] } d5 { [%clk 0:04:58] } 3. h4 { [%clk 0:04:52] } e6 { [%clk 0:04:57] } 4. Qd3!! { [%clk 0:04:48] An invention of true genius. } 4... c5 { [%clk 0:04:56] } 5. dxc5 { [%clk 0:04:18] } Bxc5! { [%clk 0:04:55] }"""
+    }
+  }
+  
+  "PGN NL string output" should {
+    "be correct when there are no move times" in {
+      val pgn = Pgn(
+        tags = List(
+          Tag(_.ECO, "D14"),
+          Tag(_.White, "Kramnik,V"),
+          Tag(_.Black, "Anand,V")
+        ),
+          turns = List(
+            Turn(
+              number = 1,
+              white = Move("d4").some,
+              black = Move("d5").some
+            ),
+            Turn(
+              number = 2,
+              white = Move("c4", nag = 1.some).some,
+              black = Move("c6", nag = 2.some).some
+            ),
+            Turn(
+              number = 3,
+              white = Move("Nc3", nag = 3.some).some,
+              black = Move("Nf6", nag = 4.some).some
+            ),
+            Turn(
+              number = 4,
+              white = Move("cxd5", nag = 5.some, comment = "The Exchange Slav, the sure way to play with zero losing chances so an ideal choice for game one".some).some,
+              black = Move("cxd5", nag = 6.some).some
+            ),
+            Turn(
+              number = 5,
+              white = Move("Bf4").some,
+              black = Move("Nc6").some
+            )
+          )
+      )
+      pgn.toNlString() must_== """Whites played by Kramnik,V.
+Blacks played by Anand,V.
+ECO information available.
+First move, white moves pawn to d4. Black moves pawn to d5. 
+Second move, white moves pawn to c4. Good move. Black moves pawn to c6. Potential mistake. 
+Third move, white moves knight to c3. Brilliant move. Black moves knight to f6. Very bad move. 
+Fourth move, white moves pawn in c to d5 and it captures a piece. The Exchange Slav, the sure way to play with zero losing chances so an ideal choice for game one. Continuing the fourth move, black moves pawn in c to d5 and it captures a piece. Potentially inaccurate move. 
+Fifth move, white moves bishop to f4. Black moves knight to c6."""
     }
   }
 }
